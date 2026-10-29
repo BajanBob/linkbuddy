@@ -4,3 +4,4 @@ android/
 ios/
 www/vendor/*.js
 .DS_Store
+__pycache__/

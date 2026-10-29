@@ -84,6 +84,12 @@ HASH=$(printf '%s%s' "$SALT" "$DPASS" | sha256sum | cut -d' ' -f1)
 read -rp "Country to appear in (for example: United States, United Kingdom, Canada) [United States]: " COUNTRY
 COUNTRY=${COUNTRY:-United States}
 
+echo
+echo "Optional extras: Tor and NordVPN Onion over VPN (open .onion sites from the TV; slow, and most"
+echo "streaming services block Tor). You can switch them on or off later on the control page."
+read -rp "Add Tor and Onion over VPN? [y/N]: " XT
+TOR_ONION=false; case "${XT:-n}" in [yY]*) TOR_ONION=true;; esac
+
 cat > "$ETC/config.json" <<EOF
 {
   "mode": "$MODE",
@@ -94,7 +100,9 @@ cat > "$ETC/config.json" <<EOF
   "country": "$COUNTRY",
   "port": 8080,
   "salt": "$SALT",
-  "hash": "$HASH"
+  "hash": "$HASH",
+  "vpn_mode": "nord",
+  "tor_onion": $TOR_ONION
 }
 EOF
 chmod 600 "$ETC/config.json"
@@ -167,6 +175,25 @@ Type=oneshot
 RemainAfterExit=yes
 ExecStart=$APP/linkedbuddy-firewall.sh up
 ExecStop=$APP/linkedbuddy-firewall.sh down
+[Install]
+WantedBy=multi-user.target
+EOF
+
+if [ "$TOR_ONION" = true ]; then
+  say "Installing Tor (optional extra)"
+  apt-get install -y -qq tor >/dev/null
+  systemctl disable --now tor >/dev/null 2>&1 || true   # Linked Buddy runs its own Tor service
+  install -d -o debian-tor -g debian-tor -m 700 /var/lib/linkedbuddy-tor
+fi
+cat > /etc/systemd/system/linkedbuddy-tor.service <<EOF
+[Unit]
+Description=Linked Buddy Tor for the TV (optional)
+After=network-online.target linkedbuddy-firewall.service
+Wants=network-online.target
+[Service]
+ExecStart=/usr/bin/tor -f $ETC/torrc --RunAsDaemon 0
+Restart=on-failure
+RestartSec=5
 [Install]
 WantedBy=multi-user.target
 EOF

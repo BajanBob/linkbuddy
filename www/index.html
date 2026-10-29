@@ -119,6 +119,15 @@ footer{color:var(--muted);font-size:13px;text-align:center;margin-top:20px}
     <p>Connect NordVPN on the phone and mirror it to the TV (see <a href="#" data-goto="cast">Cast</a>). Works for websites and most apps; protected apps may show a black screen.</p>
     <div class="note">A phone hotspot does not pass the phone's VPN to the TV on most iPhones and Android phones, so mirroring or the Gateway are the reliable ways.</div>
   </div>
+  <div class="card">
+    <h3>4. Tor and Onion over VPN <span class="tag">Optional</span></h3>
+    <p>Extra Gateway modes, off unless you choose them. <b>Onion over VPN</b> goes through NordVPN, then the Tor network. <b>Tor</b> sends every TV connection through Tor, with an optional exit country. Both let the TV's web browser open .onion sites.</p>
+    <ol>
+      <li>Say <b>y</b> to “Add Tor and Onion over VPN?” when installing the Gateway, or tap <b>Turn them on</b> on the Gateway control page.</li>
+      <li>On the control page pick the <b>Onion over VPN</b> or <b>Tor</b> tab and press Connect.</li>
+    </ol>
+    <div class="note">Tor is too slow for most video, and Netflix, Prime Video and most other streaming services block it. The TV still sends its own account and device data to Samsung, LG and app makers.</div>
+  </div>
   <p class="note">Streaming services' terms may forbid using a VPN to change region, and some detect and block VPN servers. Check the terms of the services you use.</p>
 </section>
 
@@ -144,11 +153,21 @@ footer{color:var(--muted);font-size:13px;text-align:center;margin-top:20px}
     </ol>
   </div>
   <div class="card">
+    <h3>Import your own VPN settings</h3>
+    <p>Already have a NordVPN server file, or use another VPN? The Gateway takes any OpenVPN <span class="path">.ovpn</span> file.</p>
+    <ol>
+      <li>Download the file: for NordVPN go to <a href="https://nordvpn.com/ovpn/" target="_blank" rel="noopener">nordvpn.com/ovpn</a>, find a server and choose <b>Download config</b> (UDP); for other VPNs use their “OpenVPN configuration” download.</li>
+      <li>Open the Gateway control page → <b>Import settings</b> → choose the file.</li>
+      <li>Leave the username empty to use your NordVPN login, or type the other VPN's login, then press <b>Import and connect</b>.</li>
+    </ol>
+    <p class="note">For safety the Gateway refuses files that try to run programs on it, or that point to key files elsewhere instead of having the keys pasted inside.</p>
+  </div>
+  <div class="card">
     <h3>Check and control your Gateway</h3>
     <p>Use the <b>control page address</b> shown at the end of the install (the Pi's address on your home Wi-Fi, for example <span class="path">192.168.1.40</span>).</p>
     <div class="row"><input id="gwIp" inputmode="decimal" placeholder="Gateway address, e.g. 192.168.1.40" aria-label="Gateway address"><button class="btn sec" id="gwCheck">Check</button><a class="btn" id="gwOpen" target="_blank" rel="noopener">Open control page</a></div>
     <div class="status" id="gwStatus"></div>
-    <p class="note">The control page asks for the password you chose at install (any user name). From there you switch country, turn the VPN on or off, and see the exact TV settings.</p>
+    <p class="note">The control page asks for the password you chose at install (any user name). From there you switch country, import settings, turn the optional Tor modes on, turn the VPN off, and see the exact TV settings.</p>
   </div>
 </section>
 
@@ -252,7 +271,8 @@ footer{color:var(--muted);font-size:13px;text-align:center;margin-top:20px}
       clearTimeout(t);
       if(!d.linkedbuddy)throw new Error('x');
       s.className='status '+(d.vpn?'ok':'bad');
-      s.textContent=d.vpn?'Gateway found: NordVPN is ON ('+(d.country||'')+'). The TV is protected.':'Gateway found, but NordVPN is OFF. Open the control page and press Connect.';
+      var nm=d.mode_name||'NordVPN';
+      s.textContent=d.vpn?'Gateway found: '+nm+' is ON ('+(d.country||'')+'). The TV is protected.':'Gateway found, but it is OFF. Open the control page and press Connect.';
     }).catch(function(){
       clearTimeout(t); s.className='status warn';
       s.textContent=location.protocol==='https:'?'This web version cannot reach devices on your home network. Tap “Open control page” instead, or use the installed app.':'Could not reach a Gateway at that address. Check the Pi is on and this device is on the same Wi-Fi, or tap “Open control page”.';

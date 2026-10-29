@@ -13,6 +13,9 @@ Cast your phone to Samsung, LG and other smart TVs, and give the TV NordVPN.
 2. **SmartDNS**: activate in Nord Account, set TV DNS to 103.86.96.103 / 103.86.99.103. Unblocks catalogs, no encryption.
 3. **Mirror the phone** with NordVPN on. Quickest; protected apps may show a black screen when mirrored.
 
+The Gateway can also **import your own settings** (any NordVPN or OpenVPN `.ovpn` file), and has two **optional** modes,
+**NordVPN Onion over VPN** and **Tor**, which stay off unless you switch them on. See `gateway/README.md`.
+
 Phone hotspots do not pass the phone's VPN to a TV on most phones, so they are not used.
 Streaming services' terms may forbid region-changing, and some block VPN servers.
 

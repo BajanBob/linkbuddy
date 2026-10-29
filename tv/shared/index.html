@@ -47,8 +47,9 @@ button:focus,input:focus{outline:none;border-color:#38bdf8;box-shadow:0 0 0 6px 
     $('gw').textContent='Checking…';$('gw').className='big';$('gwNote').textContent='';
     xhr('http://'+a+'/ping',function(err,d){
       if(err||!d||!d.linkedbuddy){$('gw').textContent='Not found';$('gw').className='big warn';$('gwNote').textContent='Not using the Gateway (SmartDNS or normal internet).';return}
-      $('gw').textContent=d.vpn?'NordVPN ON':'NordVPN OFF';$('gw').className='big '+(d.vpn?'ok':'bad');
-      $('gwNote').textContent=d.vpn?'Going out through '+(d.country||'NordVPN'):'Open the control page on your phone and press Connect.';
+      var nm=d.mode_name||'NordVPN';
+      $('gw').textContent=nm+(d.vpn?' ON':' OFF');$('gw').className='big '+(d.vpn?'ok':'bad');
+      $('gwNote').textContent=d.vpn?'Going out through '+(d.country||nm):'Open the control page on your phone and press Connect.';
     });
   }
 

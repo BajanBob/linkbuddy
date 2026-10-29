@@ -1,7 +1,7 @@
 {
   "name": "linked-buddy",
   "productName": "Linked Buddy",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "Cast your phone to Samsung, LG and other smart TVs, and give the TV NordVPN through SmartDNS or the Linked Buddy Gateway.",
   "main": "electron/main.js",
@@ -25,7 +25,7 @@
   "build": {
     "appId": "com.bajanbob.linkedbuddy",
     "productName": "Linked Buddy",
-    "copyright": "Copyright © 2026 BajanBob",
+    "copyright": "Copyright \u00a9 2026 BajanBob",
     "directories": {
       "output": "dist",
       "buildResources": "build"
