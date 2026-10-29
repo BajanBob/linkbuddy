@@ -1,0 +1,121 @@
+name: Build Linked Buddy
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'Publish a release with this version tag (for example v1.0.0). Leave empty to only build.'
+        required: false
+        default: ''
+  push:
+    tags: ['v*']
+permissions:
+  contents: write
+jobs:
+  desktop:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: linux-x64, os: ubuntu-latest, script: 'dist:linux' }
+          - { name: raspberry-pi, os: ubuntu-latest, script: 'dist:pi' }
+          - { name: windows, os: windows-latest, script: 'dist:win' }
+          - { name: macos, os: macos-latest, script: 'dist:mac' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund
+      - run: npm run ${{ matrix.script }} -- --publish never
+        env: { CSC_IDENTITY_AUTO_DISCOVERY: 'false', GH_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linked-buddy-${{ matrix.name }}
+          path: |
+            dist/*.AppImage
+            dist/*.deb
+            dist/*.exe
+            dist/*.dmg
+  android:
+    runs-on: ubuntu-24.04
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: actions/setup-java@v5
+        with: { distribution: temurin, java-version: 21 }
+      - run: npm install --no-audit --no-fund
+      - name: Create Android project
+        run: |
+          set -o pipefail
+          (npx cap add android && node scripts/patch-native.js android) 2>&1 | tee add.log || { tail -n 12 add.log | sed 's/^/::error::/'; exit 1; }
+      - run: npx capacitor-assets generate --android || true
+      - run: npx cap sync android
+      - name: Build APK
+        run: |
+          set -o pipefail
+          cd android && chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee ../gradle.log || { grep -iE "error|what went wrong|failed" ../gradle.log | tail -n 15 | sed 's/^/::error::/'; exit 1; }
+      - run: cp android/app/build/outputs/apk/debug/app-debug.apk Linked-Buddy-android.apk
+      - uses: actions/upload-artifact@v4
+        with: { name: linked-buddy-android, path: Linked-Buddy-android.apk }
+  ios:
+    runs-on: macos-latest
+    defaults: { run: { shell: bash } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm install --no-audit --no-fund
+      - name: Create iOS project
+        run: |
+          set -o pipefail
+          (npx cap add ios --packagemanager SPM || (rm -rf ios && npx cap add ios)) 2>&1 | tee add.log || { tail -n 15 add.log | sed 's/^/::error::/'; exit 1; }
+          node scripts/patch-native.js ios
+      - run: npx capacitor-assets generate --ios || true
+      - run: npx cap sync ios
+      - name: Build unsigned IPA
+        run: |
+          set -o pipefail
+          if [ -d ios/App/App.xcworkspace ]; then SRC="-workspace ios/App/App.xcworkspace"; else SRC="-project ios/App/App.xcodeproj"; fi
+          xcodebuild $SRC -scheme App -configuration Release -sdk iphoneos -archivePath out/App.xcarchive CODE_SIGNING_ALLOWED=NO archive 2>&1 | tee xc.log || { grep -E "error:|BUILD FAILED" xc.log | tail -n 15 | sed 's/^/::error::/'; exit 1; }
+          mkdir -p Payload && cp -R out/App.xcarchive/Products/Applications/App.app Payload/ && zip -qry Linked-Buddy-ios-unsigned.ipa Payload
+      - uses: actions/upload-artifact@v4
+        with: { name: linked-buddy-ios, path: Linked-Buddy-ios-unsigned.ipa }
+  release:
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+    needs: [desktop, android, ios]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: out, merge-multiple: true }
+      - name: Zip the Gateway and TV apps
+        run: |
+          zip -qr out/Linked-Buddy-Gateway.zip gateway
+          (cd tv && zip -qr ../out/Linked-Buddy-TV-Samsung-Tizen.zip samsung-tizen && zip -qr ../out/Linked-Buddy-TV-LG-webOS.zip lg-webos)
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.release_tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          name: Linked Buddy ${{ inputs.release_tag || github.ref_name }}
+          make_latest: true
+          body: |
+            Linked Buddy: cast your phone to Samsung, LG and other smart TVs, and give the TV NordVPN with SmartDNS or the Linked Buddy Gateway (Raspberry Pi / Linux PC).
+
+            | Device | Download |
+            |---|---|
+            | Windows | Setup (installer) or Portable .exe |
+            | Mac | .dmg (Apple Silicon and Intel) |
+            | Linux | .AppImage or .deb (x64) |
+            | Raspberry Pi | arm64 or armv7l .AppImage / .deb |
+            | Android | Linked-Buddy-android.apk |
+            | iPhone / iPad | Linked-Buddy-ios-unsigned.ipa (re-sign with your Apple ID) |
+            | Raspberry Pi / Linux NordVPN box for the TV | Linked-Buddy-Gateway.zip (`sudo bash install.sh`) |
+            | Samsung TV app | Linked-Buddy-TV-Samsung-Tizen.zip (Tizen Studio, Developer Mode) |
+            | LG TV app | Linked-Buddy-TV-LG-webOS.zip (webOS CLI, Developer Mode) |
+
+            Unsigned builds: Windows shows SmartScreen (More info > Run anyway); on Mac right-click > Open the first time.
+          files: out/**/*
