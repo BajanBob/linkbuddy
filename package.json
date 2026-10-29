@@ -1,0 +1,85 @@
+{
+  "name": "linked-buddy",
+  "productName": "Linked Buddy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Cast your phone to Samsung, LG and other smart TVs, and give the TV NordVPN through SmartDNS or the Linked Buddy Gateway.",
+  "main": "electron/main.js",
+  "author": {
+    "name": "BajanBob",
+    "email": "you@example.com"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "start:kiosk": "electron . --kiosk",
+    "dist:linux": "electron-builder --linux AppImage deb --x64",
+    "dist:pi": "electron-builder --linux AppImage deb --arm64 --armv7l",
+    "dist:win": "electron-builder --win nsis portable --x64 --arm64",
+    "dist:mac": "electron-builder --mac dmg zip --universal",
+    "android:add": "cap add android && node scripts/patch-native.js android && cap sync android",
+    "android:apk": "cap sync android && cd android && ./gradlew assembleDebug",
+    "ios:add": "cap add ios --packagemanager SPM && node scripts/patch-native.js ios && cap sync ios",
+    "ios:open": "cap open ios"
+  },
+  "build": {
+    "appId": "com.bajanbob.linkedbuddy",
+    "productName": "Linked Buddy",
+    "copyright": "Copyright © 2026 BajanBob",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**",
+      "www/**",
+      "build/icon.png",
+      "package.json"
+    ],
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ],
+      "category": "Utility",
+      "icon": "build/icon.png"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "shortcutName": "Linked Buddy",
+      "artifactName": "Linked-Buddy-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Linked-Buddy-Portable-${version}.${ext}"
+    },
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.png",
+      "hardenedRuntime": false,
+      "identity": null
+    }
+  },
+  "devDependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.0.0",
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "@capacitor/browser": "^7.0.0"
+  }
+}

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns="http://www.w3.org/ns/widgets" xmlns:tizen="http://tizen.org/ns/widgets" id="http://bajanbob.github.io/LinkedBuddyTV" version="1.0.0" viewmodes="maximized">
+    <tizen:application id="LnkBdyTV01.LinkedBuddyTV" package="LnkBdyTV01" required_version="2.3"/>
+    <content src="index.html"/>
+    <icon src="icon.png"/>
+    <name>Linked Buddy</name>
+    <author>BajanBob</author>
+    <description>Shows which country the TV appears to be in and whether the Linked Buddy NordVPN Gateway is on.</description>
+    <access origin="*" subdomains="true"/>
+    <tizen:privilege name="http://tizen.org/privilege/internet"/>
+    <tizen:profile name="tv-samsung"/>
+    <tizen:setting screen-orientation="landscape" context-menu="disable" background-support="disable" encryption="disable" install-location="auto" hwkey-event="enable"/>
+    <tizen:content-security-policy>default-src 'self'; connect-src *; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self' data:</tizen:content-security-policy>
+</widget>

@@ -1,0 +1,21 @@
+{
+  "appId": "com.bajanbob.linkedbuddy",
+  "appName": "Linked Buddy",
+  "webDir": "www",
+  "backgroundColor": "#0b1220",
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#0b1220",
+      "launchShowDuration": 500
+    },
+    "LocalNotifications": {
+      "iconColor": "#3cc4b5"
+    }
+  },
+  "server": {
+    "cleartext": true
+  },
+  "android": {
+    "allowMixedContent": true
+  }
+}

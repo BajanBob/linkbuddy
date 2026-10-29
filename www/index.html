@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+</head>
+<body>
+<title>Linked Buddy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700;800&family=Inter:wght@400;600&display=swap">
+<style>
+/* Layout: top bar with the TV-link status pill, four tabs (Cast, TV VPN, Gateway, TV app), one readable column of step cards. */
+:root{--bg:#0b1220;--surface:#121c2e;--sunk:#0e1726;--ink:#eaf0fa;--muted:#9aa8bf;--line:#22314a;--accent:#38bdf8;--accent-ink:#04131f;--ok:#34d399;--warn:#fbbf24;--bad:#f87171;--samsung:#5b8cff;--lg:#ff5a7a}
+:root[data-theme="light"]{--bg:#f4f7fb;--surface:#ffffff;--sunk:#eaf0f7;--ink:#0e1a2b;--muted:#566479;--line:#d6dfeb;--accent:#0284c7;--accent-ink:#ffffff;--ok:#059669;--warn:#b45309;--bad:#dc2626;--samsung:#1d4ed8;--lg:#be123c}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#f4f7fb;--surface:#ffffff;--sunk:#eaf0f7;--ink:#0e1a2b;--muted:#566479;--line:#d6dfeb;--accent:#0284c7;--accent-ink:#ffffff;--ok:#059669;--warn:#b45309;--bad:#dc2626;--samsung:#1d4ed8;--lg:#be123c}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:12px 16px 0;padding-top:max(12px,env(safe-area-inset-top))}
+.bar{display:flex;align-items:center;gap:10px;max-width:760px;margin:auto}
+.logo{width:34px;height:34px;flex:none}
+h1{font:800 21px Outfit,sans-serif;margin:0;letter-spacing:-.01em}
+.pill{margin-left:auto;font-size:13px;padding:5px 10px;border-radius:99px;background:var(--sunk);border:1px solid var(--line);color:var(--muted);white-space:nowrap;cursor:pointer}
+.pill b{color:var(--ink)}
+nav{display:flex;gap:4px;max-width:760px;margin:10px auto 0;overflow-x:auto}
+nav button{flex:1;min-width:80px;background:none;border:0;color:var(--muted);font:600 15px Inter,sans-serif;padding:10px 6px;border-bottom:3px solid transparent;cursor:pointer}
+nav button[aria-selected="true"]{color:var(--ink);border-color:var(--accent)}
+main{max-width:760px;margin:auto;padding:16px;padding-bottom:max(40px,env(safe-area-inset-bottom))}
+section[hidden]{display:none}
+h2{font:700 20px Outfit,sans-serif;margin:6px 0 4px}
+.lead{color:var(--muted);margin:0 0 14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.card h3{font:700 17px Outfit,sans-serif;margin:0 0 6px;display:flex;gap:8px;align-items:center}
+.tag{font:600 11px Inter,sans-serif;text-transform:uppercase;letter-spacing:.06em;padding:2px 7px;border-radius:6px;background:var(--sunk);color:var(--muted)}
+.tag.best{background:color-mix(in srgb,var(--ok) 20%,transparent);color:var(--ok)}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.seg button{background:var(--sunk);border:1px solid var(--line);color:var(--ink);padding:8px 12px;border-radius:10px;font:600 14px Inter,sans-serif;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+ol,ul{margin:6px 0;padding-left:22px}li{margin:4px 0}
+.path{font-family:ui-monospace,Menlo,monospace;font-size:14px;background:var(--sunk);padding:1px 6px;border-radius:6px}
+.note{font-size:14px;color:var(--muted);border-left:3px solid var(--warn);padding:2px 0 2px 10px;margin-top:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input{font:inherit;background:var(--sunk);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0;flex:1}
+.btn{font:700 15px Inter,sans-serif;background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:10px 16px;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.sec{background:var(--sunk);color:var(--ink);border:1px solid var(--line)}
+.copy{font:600 13px Inter,sans-serif;background:none;border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:2px 8px;cursor:pointer;margin-left:6px}
+.status{font-weight:600;margin-top:10px}.ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:620px){.grid2{grid-template-columns:1fr}}
+.brand-s{color:var(--samsung)}.brand-l{color:var(--lg)}
+.diagram{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:13px;color:var(--muted);text-align:center;margin:8px 0 4px}
+.diagram div{flex:1;background:var(--sunk);border:1px solid var(--line);border-radius:10px;padding:8px 4px}
+.diagram b{display:block;color:var(--ink);font-size:14px}.diagram i{font-style:normal;flex:none}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:20px}
+</style>
+
+<header>
+  <div class="bar">
+    <svg class="logo" viewBox="0 0 100 100" aria-hidden="true"><rect width="100" height="100" rx="22" fill="#0f2742"/><rect x="18" y="26" width="64" height="40" rx="6" fill="none" stroke="#38bdf8" stroke-width="7"/><path d="M40 78h20" stroke="#38bdf8" stroke-width="7" stroke-linecap="round"/><circle cx="74" cy="72" r="13" fill="#34d399"/><path d="M68 72l4 4 8-8" stroke="#06281b" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h1>Linked Buddy</h1>
+    <span class="pill" id="netPill" title="Tap to re-check">Checking connection…</span>
+  </div>
+  <nav role="tablist">
+    <button role="tab" data-tab="cast" aria-selected="true">Cast</button>
+    <button role="tab" data-tab="vpn" aria-selected="false">TV VPN</button>
+    <button role="tab" data-tab="gw" aria-selected="false">Gateway</button>
+    <button role="tab" data-tab="tvapp" aria-selected="false">TV app</button>
+  </nav>
+</header>
+
+<main>
+<!-- ============ CAST ============ -->
+<section id="cast">
+  <h2>Cast your phone to the TV</h2>
+  <p class="lead">Phone and TV must be on the same Wi-Fi. Pick your phone and your TV.</p>
+  <div class="seg" id="phoneSeg"><button aria-pressed="true" data-v="android">Android phone</button><button aria-pressed="false" data-v="iphone">iPhone / iPad</button><button aria-pressed="false" data-v="pc">Windows / Mac</button></div>
+  <div class="seg" id="tvSeg"><button aria-pressed="true" data-v="samsung">Samsung</button><button aria-pressed="false" data-v="lg">LG</button><button aria-pressed="false" data-v="other">Other smart TV</button></div>
+  <div class="card" id="castSteps"></div>
+  <div class="card">
+    <h3>Watch with your phone's NordVPN</h3>
+    <ol>
+      <li>Open the <b>NordVPN</b> app on the phone and connect to the country you want.</li>
+      <li>Start the show in the phone's browser or app.</li>
+      <li>Mirror the screen with the steps above. The TV shows what the phone streams, so it comes through your phone's VPN.</li>
+    </ol>
+    <div class="note">Netflix, Disney+, Prime Video and some other apps black out the picture when you mirror the whole screen (copy protection). For those, use <b>TV VPN → Gateway</b> so the TV's own app goes through NordVPN.</div>
+  </div>
+</section>
+
+<!-- ============ TV VPN ============ -->
+<section id="vpn" hidden>
+  <h2>Give the TV NordVPN</h2>
+  <p class="lead">Samsung and LG TVs cannot run a VPN app, so the VPN has to come from outside the TV. Three ways, best first.</p>
+
+  <div class="card">
+    <h3>1. Linked Buddy Gateway <span class="tag best">Best</span></h3>
+    <p>A Raspberry Pi (or old Linux PC) runs NordVPN for the TV. Plug the TV's network cable into it, or point the TV at it. Everything on the TV goes through NordVPN, including Netflix and other apps. If NordVPN drops, the TV loses internet instead of showing your real location.</p>
+    <div class="diagram"><div><b>Router</b>home Wi-Fi</div><i>→</i><div><b>Pi</b>NordVPN</div><i>→ cable →</i><div><b>TV</b>wired, automatic</div></div>
+    <button class="btn" data-goto="gw">Set up the Gateway</button>
+  </div>
+
+  <div class="card">
+    <h3>2. NordVPN SmartDNS <span class="tag">No extra box</span></h3>
+    <p>Changes only the TV's DNS. Unblocks many streaming catalogs, but it does not encrypt or hide your IP address.</p>
+    <ol>
+      <li>On a phone or computer on the <b>same home Wi-Fi as the TV</b>, sign in at <a href="https://my.nordaccount.com/" target="_blank" rel="noopener">my.nordaccount.com</a> → NordVPN → <b>Set up SmartDNS</b> → <b>Activate</b>. This registers your home IP address.</li>
+      <li>Type these on the TV:<br>
+        Primary DNS <span class="path">103.86.96.103</span><button class="copy" data-copy="103.86.96.103">Copy</button><br>
+        Secondary DNS <span class="path">103.86.99.103</span><button class="copy" data-copy="103.86.99.103">Copy</button></li>
+    </ol>
+    <div class="grid2">
+      <div><b class="brand-s">Samsung</b><ol><li><span class="path">Settings → General → Network → Network Status</span></li><li><b>IP Settings</b> → DNS Settings → <b>Enter manually</b></li><li>Type the primary DNS → OK, then restart the TV (hold Power until it reboots).</li></ol></div>
+      <div><b class="brand-l">LG webOS</b><ol><li><span class="path">Settings → All Settings → Network</span></li><li>Wired or Wi-Fi Connection → your network → <b>Advanced / Edit</b></li><li>Untick <b>Set Automatically</b>, type both DNS addresses → Connect.</li></ol></div>
+    </div>
+    <div class="note">Your home IP can change. If streaming stops unlocking, press Activate again in your Nord Account.</div>
+  </div>
+
+  <div class="card">
+    <h3>3. Mirror from the phone <span class="tag">Quickest</span></h3>
+    <p>Connect NordVPN on the phone and mirror it to the TV (see <a href="#" data-goto="cast">Cast</a>). Works for websites and most apps; protected apps may show a black screen.</p>
+    <div class="note">A phone hotspot does not pass the phone's VPN to the TV on most iPhones and Android phones, so mirroring or the Gateway are the reliable ways.</div>
+  </div>
+  <p class="note">Streaming services' terms may forbid using a VPN to change region, and some detect and block VPN servers. Check the terms of the services you use.</p>
+</section>
+
+<!-- ============ GATEWAY ============ -->
+<section id="gw" hidden>
+  <h2>Linked Buddy Gateway</h2>
+  <p class="lead">Turns a Raspberry Pi 3/4/5 or any Debian/Ubuntu PC into the TV's NordVPN box.</p>
+  <div class="card">
+    <h3>What you need</h3>
+    <ul>
+      <li>Raspberry Pi with Raspberry Pi OS, joined to your home <b>Wi-Fi</b> (so its Ethernet port is free for the TV), or a PC with two network ports.</li>
+      <li>A network cable from the Pi to the TV.</li>
+      <li>Your NordVPN <b>service credentials</b>: <a href="https://my.nordaccount.com/" target="_blank" rel="noopener">my.nordaccount.com</a> → NordVPN → <b>Manual setup</b>. These are different from your email and password.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Install (about 5 minutes)</h3>
+    <ol>
+      <li>Copy the <span class="path">gateway</span> folder from the Linked Buddy download to the Pi (USB stick or <span class="path">scp</span>).</li>
+      <li>On the Pi open Terminal in that folder and run:<br><span class="path">sudo bash install.sh</span><button class="copy" data-copy="sudo bash install.sh">Copy</button></li>
+      <li>Choose <b>1 (Cable into the Pi)</b>, type the NordVPN service login, a control-page password and the country.</li>
+      <li>Plug the TV into the Pi. On the TV pick <b>Wired network</b> with automatic settings. Done.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3>Check and control your Gateway</h3>
+    <p>Use the <b>control page address</b> shown at the end of the install (the Pi's address on your home Wi-Fi, for example <span class="path">192.168.1.40</span>).</p>
+    <div class="row"><input id="gwIp" inputmode="decimal" placeholder="Gateway address, e.g. 192.168.1.40" aria-label="Gateway address"><button class="btn sec" id="gwCheck">Check</button><a class="btn" id="gwOpen" target="_blank" rel="noopener">Open control page</a></div>
+    <div class="status" id="gwStatus"></div>
+    <p class="note">The control page asks for the password you chose at install (any user name). From there you switch country, turn the VPN on or off, and see the exact TV settings.</p>
+  </div>
+</section>
+
+<!-- ============ TV APP ============ -->
+<section id="tvapp" hidden>
+  <h2>Linked Buddy on the TV</h2>
+  <p class="lead">A small TV app that shows, on the TV itself, which country the TV appears to be in and whether it is going through your Gateway. Pick it from the TV's app list after installing.</p>
+  <div class="card">
+    <h3><span class="brand-s">Samsung</span> (Tizen)</h3>
+    <ol>
+      <li>On the TV open <b>Apps</b>, press <b>1 2 3 4 5</b> on the remote, turn <b>Developer mode On</b> and enter your computer's IP address. Restart the TV.</li>
+      <li>On the computer install <a href="https://developer.samsung.com/smarttv/develop/tools/tizen-studio.html" target="_blank" rel="noopener">Tizen Studio</a> with the TV Extensions and create a free Samsung certificate (Certificate Manager).</li>
+      <li>Import the <span class="path">tv/samsung-tizen</span> folder, then <b>Run As → Tizen Web Application</b> with the TV selected in Device Manager.</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h3><span class="brand-l">LG</span> (webOS)</h3>
+    <ol>
+      <li>Install <b>Developer Mode</b> from the LG Content Store, sign in with a free LG developer account and switch <b>Dev Mode Status On</b>.</li>
+      <li>Install the webOS CLI (<span class="path">npm i -g @webos-tools/cli</span>), add the TV with <span class="path">ares-setup-device</span>.</li>
+      <li>In <span class="path">tv/lg-webos</span>: <span class="path">ares-package . && ares-install *.ipk</span></li>
+    </ol>
+  </div>
+  <p class="note">TV makers do not let apps change network settings or run a VPN, so the TV app reports status. The Gateway and SmartDNS steps are what change where the TV appears to be.</p>
+</section>
+
+<footer>Linked Buddy · not affiliated with NordVPN, Samsung or LG</footer>
+</main>
+
+<script src="native-shim.js"></script>
+<script>
+(function(){
+  var store={get:function(k){try{return localStorage.getItem('lb_'+k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem('lb_'+k,v)}catch(e){}}};
+  var $=function(id){return document.getElementById(id)};
+
+  // ---- tabs
+  function show(tab){
+    document.querySelectorAll('nav button').forEach(function(b){b.setAttribute('aria-selected',b.dataset.tab===tab?'true':'false')});
+    document.querySelectorAll('main section').forEach(function(s){s.hidden=s.id!==tab});
+    store.set('tab',tab); window.scrollTo(0,0);
+  }
+  document.querySelectorAll('nav button').forEach(function(b){b.onclick=function(){show(b.dataset.tab)}});
+  document.querySelectorAll('[data-goto]').forEach(function(b){b.onclick=function(e){e.preventDefault();show(b.dataset.goto)}});
+  show(store.get('tab')||'cast');
+
+  // ---- cast steps
+  var STEPS={
+    android:{
+      samsung:['On the TV: make sure it is on and on the same Wi-Fi as the phone.','On the phone swipe down twice from the top to open Quick Settings.','Tap <b>Smart View</b> (Samsung phones) or <b>Screen Cast / Cast / Screen mirroring</b> (other Android phones).','Pick your Samsung TV. If the TV asks, choose <b>Allow</b>.','To stop, tap Smart View again → Disconnect.'],
+      lg:['On the TV: open <b>Screen Share</b> from the home launcher (newer LG TVs accept mirroring automatically).','On the phone open Quick Settings and tap <b>Smart View</b>, <b>Screen Cast</b> or <b>Screen mirroring</b>.','Pick your LG TV and accept the prompt on the TV.','To stop, tap the cast icon again → Disconnect.'],
+      other:['Google TV / Android TV / Chromecast: open Quick Settings → <b>Cast</b> or <b>Screen Cast</b> → pick the TV.','Fire TV: hold Home on the remote → <b>Mirroring</b>, then Cast from the phone.','Roku: enable <span class="path">Settings → System → Screen mirroring</span>, then Cast from the phone.','Inside YouTube and many apps, tap the cast icon instead: it plays on the TV directly and frees your phone.']
+    },
+    iphone:{
+      samsung:['Samsung TVs from 2018 onward support AirPlay. On the TV: <span class="path">Settings → General → Apple AirPlay Settings</span> → AirPlay On.','On the iPhone open Control Center (swipe down from the top-right corner).','Tap <b>Screen Mirroring</b> and pick your Samsung TV.','Type the code shown on the TV the first time.'],
+      lg:['LG TVs from 2018 onward (webOS 4+ with an update) support AirPlay. On the TV: Home → <b>Home Dashboard → AirPlay</b> → On.','On the iPhone open Control Center → <b>Screen Mirroring</b> → pick the LG TV.','Type the code shown on the TV.'],
+      other:['Apple TV and Roku/Fire TV/Vizio sets with AirPlay: Control Center → Screen Mirroring.','Chromecast/Google TV: iPhones cannot mirror the whole screen; use the cast icon inside apps like YouTube.','Older TVs: use an HDMI adapter (Lightning or USB-C to HDMI) and a cable.']
+    },
+    pc:{
+      samsung:['Windows: press <b>Windows + K</b> and pick the Samsung TV (it accepts Miracast).','Mac (2018+ Samsung): click Control Center → <b>Screen Mirroring</b> → the TV.','Chrome browser: menu ⋮ → <b>Cast…</b> works when the TV has Chromecast built in.','For the best picture use an HDMI cable.'],
+      lg:['Windows: on the TV open <b>Screen Share</b>, then press <b>Windows + K</b> on the PC and pick the TV.','Mac: Control Center → <b>Screen Mirroring</b> → the LG TV (AirPlay models).','For the best picture use an HDMI cable.'],
+      other:['Windows: <b>Windows + K</b> for Miracast TVs and Fire TV.','Mac: Control Center → Screen Mirroring for AirPlay TVs.','Chrome: menu ⋮ → Cast… for Chromecast and Google TV.']
+    }
+  };
+  var phone=store.get('phone')||(/iPhone|iPad|iPod/.test(navigator.userAgent)?'iphone':/Android/.test(navigator.userAgent)?'android':'pc'), tv=store.get('tv')||'samsung';
+  function seg(id,val,cb){document.querySelectorAll('#'+id+' button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===val?'true':'false');b.onclick=function(){cb(b.dataset.v)}})}
+  function renderCast(){
+    seg('phoneSeg',phone,function(v){phone=v;store.set('phone',v);renderCast()});
+    seg('tvSeg',tv,function(v){tv=v;store.set('tv',v);renderCast()});
+    var names={android:'Android phone',iphone:'iPhone / iPad',pc:'Windows / Mac'},tvn={samsung:'Samsung TV',lg:'LG TV',other:'other smart TVs'};
+    $('castSteps').innerHTML='<h3>'+names[phone]+' → '+tvn[tv]+'</h3><ol>'+STEPS[phone][tv].map(function(s){return '<li>'+s+'</li>'}).join('')+'</ol>';
+  }
+  renderCast();
+
+  // ---- copy buttons
+  document.querySelectorAll('[data-copy]').forEach(function(b){b.onclick=function(){
+    var t=b.dataset.copy; var done=function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)};
+    if(navigator.clipboard)navigator.clipboard.writeText(t).then(done,done);else done();
+  }});
+
+  // ---- this device's public connection (shows whether the phone's VPN is on)
+  function checkNet(){
+    var p=$('netPill'); p.textContent='Checking connection…';
+    fetch('https://ipwho.is/',{cache:'no-store'}).then(function(r){return r.json()}).then(function(d){
+      var isp=(d.connection&&(d.connection.isp||d.connection.org))||'';
+      var nord=/nord|tefincom|packethub|datacamp|m247|clouvider/i.test(isp);
+      p.innerHTML='This device: <b>'+(d.country||'?')+'</b>'+(nord?' · NordVPN on':'');
+      p.title=(d.ip||'')+' '+isp+' (tap to re-check)';
+    }).catch(function(){p.textContent='Offline'});
+  }
+  $('netPill').onclick=checkNet; checkNet();
+
+  // ---- gateway check
+  var gwIp=$('gwIp'); gwIp.value=store.get('gw')||'';
+  function gwUrl(){var v=(gwIp.value.trim()||'192.168.1.40');v=v.replace(/^https?:\/\//,'').replace(/\/.*$/,'');if(!/:\d+$/.test(v))v+=':8080';return 'http://'+v}
+  function syncOpen(){$('gwOpen').href=gwUrl()+'/'}
+  gwIp.oninput=function(){store.set('gw',gwIp.value.trim());syncOpen()}; syncOpen();
+  $('gwCheck').onclick=function(){
+    var s=$('gwStatus'); s.className='status'; s.textContent='Checking '+gwUrl()+' …';
+    var ctl=('AbortController' in window)?new AbortController():null; var t=setTimeout(function(){ctl&&ctl.abort()},6000);
+    fetch(gwUrl()+'/ping',{cache:'no-store',signal:ctl&&ctl.signal}).then(function(r){return r.json()}).then(function(d){
+      clearTimeout(t);
+      if(!d.linkedbuddy)throw new Error('x');
+      s.className='status '+(d.vpn?'ok':'bad');
+      s.textContent=d.vpn?'Gateway found: NordVPN is ON ('+(d.country||'')+'). The TV is protected.':'Gateway found, but NordVPN is OFF. Open the control page and press Connect.';
+    }).catch(function(){
+      clearTimeout(t); s.className='status warn';
+      s.textContent=location.protocol==='https:'?'This web version cannot reach devices on your home network. Tap “Open control page” instead, or use the installed app.':'Could not reach a Gateway at that address. Check the Pi is on and this device is on the same Wi-Fi, or tap “Open control page”.';
+    });
+  };
+})();
+</script>
+
+</body>
+</html>
